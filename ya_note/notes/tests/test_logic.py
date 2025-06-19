@@ -110,6 +110,6 @@ class TestNoteEditDelete(TestCase):
         self.form_data['slug'] = self.note.slug
         response = self.author_client.post(URL_TO_ADD,
                                            data=self.form_data)
-        self.assertFormError(response, 'form', 'slug',
-                             errors=(self.note.slug + WARNING))
+        self.assertFormError(response.context['form'], 'slug',
+                             errors=self.note.slug + WARNING)
         self.assertEqual(Note.objects.count(), self.notes_counts + 1)

@@ -25,8 +25,10 @@ def test_home_availability_for_anonymous_user(client):
 )
 def test_pages_availability_for_anonymous_user(client, name, args):
     url = reverse(name, args=args)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+    if name == 'users:logout':
+        assert client.post(url).status_code == HTTPStatus.OK
+    else:
+        assert client.get(url).status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(

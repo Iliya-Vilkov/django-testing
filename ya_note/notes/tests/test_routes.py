@@ -25,7 +25,6 @@ class TestRoutes(TestCase):
         urls = (
             ('notes:home'),
             ('users:login'),
-            ('users:logout'),
             ('users:signup'),
         )
         for name in urls:

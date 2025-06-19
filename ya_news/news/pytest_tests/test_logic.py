@@ -7,6 +7,8 @@ from pytest_django.asserts import assertFormError, assertRedirects
 from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 
+FORM_COMMENT = {'text': 'Текст'}
+
 
 @pytest.mark.django_db
 def test_anonymous_user_cant_create_comment(client, form_data, id_for_args):
@@ -36,8 +38,7 @@ def test_user_cant_use_bad_words(admin_client, id_for_args):
     bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
     response = admin_client.post(url, data=bad_words_data)
     assertFormError(
-        response,
-        form='form',
+        response.context['form'],
         field='text',
         errors=WARNING
     )
