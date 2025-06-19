@@ -17,6 +17,7 @@ def test_anonymous_user_cant_create_comment(client, form_data, id_for_args):
     assertRedirects(response, expected_url)
     assert Comment.objects.count() == 0
 
+
 def test_user_can_create_comment(author_client, author, id_for_args, form_data):
     url = reverse('news:detail', args=id_for_args)
     response = author_client.post(url, data=form_data)
@@ -41,6 +42,7 @@ def test_user_cant_use_bad_words(admin_client, id_for_args):
     comments_count = Comment.objects.count()
     assert comments_count == 0
 
+
 def test_author_can_delete_comment(author_client, id_for_args, id_comment_for_args):
     url = reverse('news:detail', args=id_for_args)
     url_to_comments = f'{url}#comments'
@@ -49,6 +51,7 @@ def test_author_can_delete_comment(author_client, id_for_args, id_comment_for_ar
     assertRedirects(response, url_to_comments)
     comments_count = Comment.objects.count()
     assert comments_count == 0
+
 
 def test_author_can_edit_comment(author_client, comment, form_data, id_for_args, id_comment_for_args):
     url = reverse('news:detail', args=id_for_args)
@@ -59,12 +62,14 @@ def test_author_can_edit_comment(author_client, comment, form_data, id_for_args,
     comment.refresh_from_db()
     assert comment.text == form_data['text']
 
+
 def test_user_cant_edit_comment_of_another_user(admin_client, form_data, comment, id_comment_for_args):
     url = reverse('news:edit', args=id_comment_for_args)
     response = admin_client.post(url, form_data)
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment_from_db = Comment.objects.get(id=comment.id)
     assert comment.text == comment_from_db.text
+
 
 def test_user_cant_delete_comment_of_another_user(admin_client, comment, id_comment_for_args):
     url = reverse('news:delete', args=id_comment_for_args)

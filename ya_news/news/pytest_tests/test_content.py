@@ -1,5 +1,6 @@
 import pytest
 from django.urls import reverse
+from pytest_lazy_fixtures import lf
 
 from yanews.settings import NEWS_COUNT_ON_HOME_PAGE
 
@@ -36,8 +37,8 @@ def test_comments_order(client, comments, new):
 @pytest.mark.parametrize(
     'parametrized_client, form_in_page',
     (
-        (pytest.lazy_fixture('client'), False),
-        (pytest.lazy_fixture('author_client'), True)
+        (lf('client'), False),
+        (lf('author_client'), True)
     ),
 )
 def test_form_availability_for_different_users(
