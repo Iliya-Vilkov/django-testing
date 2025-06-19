@@ -12,6 +12,7 @@ def test_home_availability_for_anonymous_user(client):
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'name, args',
@@ -26,6 +27,7 @@ def test_pages_availability_for_anonymous_user(client, name, args):
     url = reverse(name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
+
 
 @pytest.mark.parametrize(
     'parametrized_client, expected_status',
@@ -47,6 +49,7 @@ def test_pages_availability_for_different_users(
     url = reverse(name, args=args)
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
