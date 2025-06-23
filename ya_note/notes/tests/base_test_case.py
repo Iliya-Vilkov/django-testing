@@ -18,10 +18,10 @@ DETAIL_URL = reverse('notes:detail', args=[NOTE_SLUG])
 DELETE_URL = reverse('notes:delete', args=[NOTE_SLUG])
 HOME_URL = reverse('notes:home')
 LIST_URL = reverse('notes:list')
-SUCCES_URL = reverse('notes:success')
+SUCCESS_URL = reverse('notes:success')
 LOGIN_URL = reverse('users:login')
-LOGAUT_URL = reverse('users:logaut')
-SIGUP_URL = reverse('users:signuip')
+LOGOUT_URL = reverse('users:logout')
+SIGNUP_URL = reverse('users:signup')
 REDIRECT_LIST_URL = f'{LOGIN_URL}?next={LIST_URL}'
 REDIRECT_ADD_URL = f'{LOGIN_URL}?next={ADD_URL}'
 REDIRECT_DETAIL_URL = f'{LOGIN_URL}?next={DETAIL_URL}'
@@ -34,13 +34,17 @@ class BaseTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Илья Вилков')
-        cls.note = Note.objects.create(title='Заголовок',
-                                       text='Текст',
-                                       author=cls.author)
         cls.reader = User.objects.create(username='Илья')
-        cls.form_data = {'text': cls.NOTE_TEXT, 'title': cls.NOTE_TITLE,
-                         'slug': cls.NOTE_SLUG, 'author': cls.auth_client}
+        cls.note = Note.objects.create(title=NOTE_TITLE,
+                                       text=NOTE_TEXT,
+                                       slug=NOTE_SLUG,
+                                       author=cls.author)
+        cls.form_data = {
+            'title': NOTE_TITLE,
+            'text': NOTE_TEXT,
+            'slug': NOTE_SLUG
+        }
         cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
         cls.reader_client = Client()
+        cls.author_client.force_login(cls.author)
         cls.reader_client.force_login(cls.reader)

@@ -1,60 +1,76 @@
 from http import HTTPStatus
-from django.urls import reverse
 
-from notes.tests.base_test_case import BaseTest
+from notes.tests.base_test_case import (BaseTest,
+                                        ADD_URL,
+                                        EDIT_URL,
+                                        DETAIL_URL,
+                                        DELETE_URL,
+                                        HOME_URL,
+                                        LIST_URL,
+                                        SUCCESS_URL,
+                                        LOGIN_URL,
+                                        LOGOUT_URL,
+                                        SIGNUP_URL,
+                                        REDIRECT_LIST_URL,
+                                        REDIRECT_ADD_URL,
+                                        REDIRECT_DETAIL_URL,
+                                        REDIRECT_DELETE_URL,
+                                        REDIRECT_EDIT_URL)
 
 
 class TestRoutes(BaseTest):
-
     def test_pages_availability(self):
-        urls = (
-            ('notes:home'),
-            ('users:login'),
-            ('users:signup'),
-        )
-        for name in urls:
-            with self.subTest(name=name):
-                url = reverse(name)
-                response = self.client.get(url)
-                self.assertEqual(response.status_code, HTTPStatus.OK)
+        users_statuses = [
+            (ADD_URL, self.client, HTTPStatus.FOUND),
+            (EDIT_URL, self.client, HTTPStatus.FOUND),
+            (DETAIL_URL, self.client, HTTPStatus.FOUND),
+            (DELETE_URL, self.client, HTTPStatus.FOUND),
+            (HOME_URL, self.client, HTTPStatus.OK),
+            (LIST_URL, self.client, HTTPStatus.FOUND),
+            (LOGIN_URL, self.client, HTTPStatus.OK),
+            (LOGOUT_URL, self.client, HTTPStatus.OK),
+            (SIGNUP_URL, self.client, HTTPStatus.OK),
 
-    def test_availability_for_note_show_and_edit_and_delete(self):
-        users_statuses = (
-            (self.author_client, HTTPStatus.OK),
-            (self.reader_client, HTTPStatus.NOT_FOUND),
-        )
-        for user, status in users_statuses:
-            for name in ('notes:detail', 'notes:edit', 'notes:delete'):
-                with self.subTest(user=user, name=name):
-                    url = reverse(name, args=(self.note.slug,))
-                    response = user.get(url)
-                    self.assertEqual(response.status_code, status)
+            (EDIT_URL, self.author_client, HTTPStatus.OK),
+            (DETAIL_URL, self.author_client, HTTPStatus.OK),
+            (DELETE_URL, self.author_client, HTTPStatus.OK),
+            (LOGIN_URL, self.author_client, HTTPStatus.OK),
+            (LOGOUT_URL, self.author_client, HTTPStatus.OK),
+            (SIGNUP_URL, self.author_client, HTTPStatus.OK),
 
-    def test_availability_for_note_add_and_list(self):
-        urls = (
-            ('notes:add'),
-            ('notes:list'),
-            ('notes:success'),
-        )
-        for name in urls:
-            with self.subTest(name=name):
-                url = reverse(name)
-                response = self.author_client.get(url)
-            self.assertEqual(response.status_code, HTTPStatus.OK)
+            (ADD_URL, self.reader_client, HTTPStatus.OK),
+            (EDIT_URL, self.reader_client, HTTPStatus.NOT_FOUND),
+            (DETAIL_URL, self.reader_client, HTTPStatus.NOT_FOUND),
+            (DELETE_URL, self.reader_client, HTTPStatus.NOT_FOUND),
+            (LIST_URL, self.reader_client, HTTPStatus.OK),
+            (SUCCESS_URL, self.reader_client, HTTPStatus.OK),
+            (LOGIN_URL, self.reader_client, HTTPStatus.OK),
+            (LOGOUT_URL, self.reader_client, HTTPStatus.OK),
+            (SIGNUP_URL, self.reader_client, HTTPStatus.OK),
+        ]
+
+        for url, client, expected_status in users_statuses:
+            if url == LOGOUT_URL:
+                assert client.post(url).status_code == HTTPStatus.OK
+            else:
+                with self.subTest(url=url, client=client):
+                    self.assertEqual(
+                        client.get(url).status_code,
+                        expected_status,
+                    )
 
     def test_redirect_for_anonymous_client(self):
-        login_url = reverse('users:login')
-        urls = (
-            ('notes:detail', (self.note.slug,)),
-            ('notes:edit', (self.note.slug,)),
-            ('notes:delete', (self.note.slug,)),
-            ('notes:add', None),
-            ('notes:list', None),
-            ('notes:success', None),
-        )
-        for name, args in urls:
-            with self.subTest(name=name):
-                url = reverse(name, args=args)
-                redirect_url = f'{login_url}?next={url}'
-                response = self.client.get(url)
-                self.assertRedirects(response, redirect_url)
+        redirect_list = [
+            (LIST_URL, REDIRECT_LIST_URL),
+            (ADD_URL, REDIRECT_ADD_URL),
+            (DETAIL_URL, REDIRECT_DETAIL_URL),
+            (DELETE_URL, REDIRECT_DELETE_URL),
+            (EDIT_URL, REDIRECT_EDIT_URL)
+        ]
+
+        for url, redirect_url in redirect_list:
+            with self.subTest(name=url):
+                self.assertRedirects(
+                    self.client.get(url),
+                    redirect_url
+                )
