@@ -9,9 +9,6 @@ User = get_user_model()
 NOTE_SLUG = 'slug'
 NOTE_TEXT = 'Текст заметки'
 NOTE_TITLE = 'Текст заголовка'
-NEW_NOTE_TEXT = 'Обновлённая заметка'
-NEW_NOTE_TITLE = 'Обновлённый заголовок заметки'
-NEW_NOTE_SLUG = 'new_slug'
 ADD_URL = reverse('notes:add')
 EDIT_URL = reverse('notes:edit', args=[NOTE_SLUG])
 DETAIL_URL = reverse('notes:detail', args=[NOTE_SLUG])
