@@ -1,54 +1,36 @@
 import pytest
-from django.urls import reverse
-from pytest_lazy_fixtures import lf
 
+from news.forms import CommentForm
 from yanews.settings import NEWS_COUNT_ON_HOME_PAGE
 
+pytestmark = pytest.mark.django_db
 
-@pytest.mark.django_db
-def test_news_count(client, news_list):
-    url = reverse('news:home')
-    response = client.get(url)
+
+def test_news_count(client, news_list, news_home_url):
+    response = client.get(news_home_url)
     object_list = response.context['object_list']
     assert "news_list" in response.context
-    news_count = len(object_list)
+    news_count = object_list.count()
     assert news_count is NEWS_COUNT_ON_HOME_PAGE
 
 
-@pytest.mark.django_db
-def test_news_order(client):
-    url = reverse('news:home')
-    response = client.get(url)
+def test_news_order(client, news_home_url):
+    response = client.get(news_home_url)
     object_list = response.context['object_list']
     all_dates = [news.date for news in object_list]
     sorted_dates = sorted(all_dates, reverse=True)
     assert all_dates == sorted_dates
 
 
-@pytest.mark.django_db
-def test_comments_order(client, comments, new):
-    url = reverse("news:detail", args=(new.id,))
-    response = client.get(url)
-    assert "news" in response.context
-    news = response.context['news']
-    all_comments = news.comment_set.all()
-    sorted_comments = sorted(
-        all_comments, key=lambda comment: comment.created, reverse=False
-    )
-    assert sorted_comments == comments
+def test_comments_order(author_client, comments, news_detail_url):
+    comments = (author_client.get(news_detail_url).
+                context['news'].comment_set.all())
+    all_comments = [comment.created for comment in comments]
+    sorted_comments = sorted(all_comments)
+    assert all_comments == sorted_comments
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize(
-    'parametrized_client, form_in_page',
-    (
-        (lf('client'), False),
-        (lf('author_client'), True)
-    ),
-)
-def test_form_availability_for_different_users(
-        new, parametrized_client, form_in_page
-):
-    url = reverse('news:detail', args=(new.id,))
-    response = parametrized_client.get(url)
-    assert ('form' in response.context) is form_in_page
+def test_form_availability_for_different_users(author_client, news_detail_url):
+    response = author_client.get(news_detail_url)
+    assert 'form' in response.context
+    assert isinstance(response.context['form'], CommentForm)
